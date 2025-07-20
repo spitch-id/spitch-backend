@@ -10,6 +10,7 @@ import (
 
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/spitch-id/spitch-backend/internal/config"
+	"github.com/spitch-id/spitch-backend/internal/handler"
 )
 
 func main() {
@@ -17,10 +18,13 @@ func main() {
 	app := config.NewFiber(env)
 	validator := config.NewValidator()
 
+	userHandler := handler.NewUserHandler(validator)
+
 	apiGroup := app.Group("/api")
 	config.NewServerConfig(&config.ServerConfig{
-		App:       apiGroup,
-		Validator: validator,
+		App:         apiGroup,
+		Validator:   validator,
+		UserHandler: userHandler,
 	})
 
 	done := make(chan bool, 1)

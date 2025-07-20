@@ -1,17 +1,26 @@
 package routes
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
+	"github.com/spitch-id/spitch-backend/domain"
+)
 
 type Route struct {
-	App fiber.Router
+	App         fiber.Router
+	Validate    *validator.Validate
+	UserHandler domain.UserHandler
 }
 
-func NewRoute(app fiber.Router) *Route {
+func NewRoute(app fiber.Router, validator validator.Validate, userHandler domain.UserHandler) *Route {
 	return &Route{
-		App: app,
+		App:         app,
+		Validate:    &validator,
+		UserHandler: userHandler,
 	}
 }
 
 func (r *Route) Setup() {
-	AuthRoutes(r.App)
+	versionOne := r.App.Group("/v1")
+	r.AuthRoutes(versionOne)
 }

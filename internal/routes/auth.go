@@ -1,17 +1,17 @@
 package routes
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+)
 
-func AuthRoutes(app fiber.Router) {
+func (r *Route) AuthRoutes(app fiber.Router) {
 	auth := app.Group("/auth")
 
 	auth.Post("/login", func(c *fiber.Ctx) error {
 		return c.SendString("Login endpoint")
 	})
 
-	auth.Post("/register", func(c *fiber.Ctx) error {
-		return c.SendString("Register endpoint")
-	})
+	auth.Post("/register", r.UserHandler.RegisterUser)
 
 	auth.Get("/logout", func(c *fiber.Ctx) error {
 		return c.SendString("Logout endpoint")
