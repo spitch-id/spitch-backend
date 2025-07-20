@@ -3,6 +3,8 @@ package domain
 import (
 	"database/sql"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type User struct {
@@ -42,19 +44,18 @@ type UserUsecase interface {
 }
 
 type UserHandler interface {
-	RegisterUser(user *User) (*User, error)
-	LoginUser(email, password string) (*User, error)
-	VerifyUserEmail(id string) error
-	ChangeUserPassword(id, oldPassword, newPassword string) error
-	ResetUserPassword(email, newPassword string) error
-	GetUserByID(id string) (*User, error)
-	GetUserByEmail(email string) (*User, error)
-	UpdateUser(user *User) error
-	DeleteUser(id string) error
-	ListUsers() ([]*User, error)
+	RegisterUser(ctx *fiber.Ctx) error
+	LoginUser(ctx *fiber.Ctx) error
+	VerifyEmail(ctx *fiber.Ctx) error
+	ChangePassword(ctx *fiber.Ctx) error
+	ResetPassword(ctx *fiber.Ctx) error
+	GetUserByID(ctx *fiber.Ctx) error
+	GetUserByEmail(ctx *fiber.Ctx) error
+	UpdateUser(ctx *fiber.Ctx) error
+	DeleteUser(ctx *fiber.Ctx) error
+	ListUsers(ctx *fiber.Ctx) error
 }
 
-// UserValidator defines the methods for validating user data.
 type UserValidator interface {
 	ValidateRegistration(user *User) error
 	ValidateLogin(email, password string) error
