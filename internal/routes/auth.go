@@ -17,11 +17,19 @@ func AuthRoutes(app fiber.Router) {
 		return c.SendString("Logout endpoint")
 	})
 
-	auth.Get("/forgot-password", func(c *fiber.Ctx) error {
-		return c.SendString("Forgot Password endpoint")
+	auth.Get("/reset-password", func(c *fiber.Ctx) error {
+		return c.SendString("Reset Password endpoint")
 	})
 
 	auth.Get("/verify-email", func(c *fiber.Ctx) error {
 		return c.SendString("Verify Email endpoint")
+	})
+
+	auth.Delete("/delete-account", func(c *fiber.Ctx) error {
+		return c.SendString("Delete Account endpoint")
+	})
+
+	app.Patch("/change-password", func(c *fiber.Ctx) error {
+		return c.SendString("Change Password endpoint")
 	})
 }
