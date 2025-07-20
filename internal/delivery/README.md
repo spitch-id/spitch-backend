@@ -1,3 +1,3 @@
 # CONFIG
 
-This folder defines environment variables.
+This folder defines delivery layer for http handler or messaging
