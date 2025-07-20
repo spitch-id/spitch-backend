@@ -15,9 +15,13 @@ import (
 func main() {
 	env := config.NewEnv()
 	app := config.NewFiber(env)
+	validator := config.NewValidator()
 
 	apiGroup := app.Group("/api")
-	config.NewServerConfig(&config.ServerConfig{App: apiGroup})
+	config.NewServerConfig(&config.ServerConfig{
+		App:       apiGroup,
+		Validator: validator,
+	})
 
 	done := make(chan bool, 1)
 
