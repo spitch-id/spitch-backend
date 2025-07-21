@@ -25,6 +25,20 @@ type Env struct {
 	DATABASE_MAXLIFETIME_CONNECTIONS int    `mapstructure:"DATABASE_MAXLIFETIME_CONNECTIONS"`
 	LOG_LEVEL                        int    `mapstructure:"LOG_LEVEL"`
 	ALLOWED_ORIGINS                  string `mapstructure:"ALLOWED_ORIGINS"`
+	REFRESH_COOKIE_NAME              string `mapstructure:"REFRESH_COOKIE_NAME"`
+	REFRESH_COOKIE_DOMAIN            string `mapstructure:"REFRESH_COOKIE_DOMAIN"`
+	REFRESH_COOKIE_PATH              string `mapstructure:"REFRESH_COOKIE_PATH"`
+	REFRESH_COOKIE_SECURE            bool   `mapstructure:"REFRESH_COOKIE_SECURE"`
+	REFRESH_COOKIE_HTTPONLY          bool   `mapstructure:"REFRESH_COOKIE_HTTPONLY"`
+	REFRESH_COOKIE_SAMESITE          string `mapstructure:"REFRESH_COOKIE_SAMESITE"`
+	REFRESH_COOKIE_MAXAGE            int    `mapstructure:"REFRESH_COOKIE_MAXAGE"`
+	ACCESS_COOKIE_NAME               string `mapstructure:"ACCESS_COOKIE_NAME"`
+	ACCESS_COOKIE_DOMAIN             string `mapstructure:"ACCESS_COOKIE_DOMAIN"`
+	ACCESS_COOKIE_PATH               string `mapstructure:"ACCESS_COOKIE_PATH"`
+	ACCESS_COOKIE_SECURE             bool   `mapstructure:"ACCESS_COOKIE_SECURE"`
+	ACCESS_COOKIE_HTTPONLY           bool   `mapstructure:"ACCESS_COOKIE_HTTPONLY"`
+	ACCESS_COOKIE_SAMESITE           string `mapstructure:"ACCESS_COOKIE_SAMESITE"`
+	ACCESS_COOKIE_MAXAGE             int    `mapstructure:"ACCESS_COOKIE_MAXAGE"`
 }
 
 func NewEnv() *Env {
