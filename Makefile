@@ -29,5 +29,12 @@ watch:
                 exit 1; \
             fi; \
         fi
+# Generate RSA keys
+generate-keys:
+	@echo "Generating RSA keys..."
+	@mkdir -p keys
+	@cd keys && \
+		openssl genrsa -out private.pem 2048 && \
+		openssl rsa -in private.pem -pubout -out public.pem
 
-.PHONY: all build run clean watch
+.PHONY: all build run clean watch generate-keys
