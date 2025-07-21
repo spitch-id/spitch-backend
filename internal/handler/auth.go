@@ -5,10 +5,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/spitch-id/spitch-backend/domain"
 	"github.com/spitch-id/spitch-backend/internal/dto"
+	"github.com/spitch-id/spitch-backend/internal/utils"
 )
 
 type userHandler struct {
-	Validate *validator.Validate
+	Validate    *validator.Validate
+	UserUsecase domain.UserUsecase
 }
 
 // ChangePassword implements domain.UserHandler.
@@ -44,15 +46,51 @@ func (u *userHandler) LoginUser(ctx *fiber.Ctx) error {
 // RegisterUser implements domain.UserHandler.
 func (u *userHandler) RegisterUser(ctx *fiber.Ctx) error {
 	request := new(dto.UserAuthRequest)
+	language := ctx.Get("Accept-Language", "en")
+	if language == "" {
+		language = "en"
+	}
+
 	if err := ctx.BodyParser(request); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
 	}
+
 	if err := u.Validate.Struct(request); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "Validation failed: "+err.Error())
+		return utils.HandleValidationError(ctx, u.Validate, err)
+	}
+
+	newUser := &dto.UserAuthRequest{
+		Email:    request.Email,
+		Password: request.Password,
+	}
+
+	hashedPassword, err := utils.HashPassword(newUser.Password)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to hash password")
+	}
+
+	newUser.Password = hashedPassword
+
+	existingUser, err := u.UserUsecase.GetUserByEmail(ctx.Context(), request)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to check existing user")
+	}
+
+	if existingUser != nil && existingUser.Email == newUser.Email {
+		return fiber.NewError(fiber.StatusConflict, "User already exists")
+	}
+
+	userData, err := u.UserUsecase.Register(ctx.Context(), newUser)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to register user")
+	}
+
+	if userData == nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "User registration failed")
 	}
 
 	response := dto.UserAuthResponse{
-		Email: request.Email,
+		Email: userData.Email,
 	}
 
 	ctx.Status(fiber.StatusCreated)
@@ -74,8 +112,9 @@ func (u *userHandler) VerifyEmail(ctx *fiber.Ctx) error {
 	panic("unimplemented")
 }
 
-func NewUserHandler(validate *validator.Validate) domain.UserHandler {
+func NewUserHandler(validate *validator.Validate, userUseCase domain.UserUsecase) domain.UserHandler {
 	return &userHandler{
-		Validate: validate,
+		Validate:    validate,
+		UserUsecase: userUseCase,
 	}
 }
