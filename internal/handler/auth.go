@@ -165,8 +165,52 @@ func (u *userHandler) RegisterUser(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusInternalServerError, "User registration failed")
 	}
 
-	response := dto.UserAuthResponse{
+	response := &dto.UserAuthResponse{
 		Email: userData.Email,
+	}
+
+	tokenCreatedAt := time.Now()
+	refreshTokenExpirationDate := tokenCreatedAt.Add(time.Hour * 24 * 30)
+	accessTokenExpirationDate := tokenCreatedAt.Add(time.Hour * 24)
+
+	refreshTokenPayload := utils.JWTClaim{
+		ID:        "123123",
+		UserID:    userData.ID,
+		Email:     userData.Email,
+		CreatedAt: tokenCreatedAt,
+		ExpiresAt: refreshTokenExpirationDate,
+		Issuer:    u.Env.REFRESH_COOKIE_DOMAIN,
+	}
+
+	acceessTokenPayload := utils.JWTClaim{
+		ID:        "123123",
+		UserID:    userData.ID,
+		Email:     userData.Email,
+		CreatedAt: tokenCreatedAt,
+		ExpiresAt: accessTokenExpirationDate,
+		Issuer:    u.Env.ACCESS_COOKIE_DOMAIN,
+	}
+
+	refreshToken, err := utils.CreateJWT(refreshTokenPayload, "internal/certs/token/private.pem")
+	if err != nil {
+		log.Errorf("Failed to create refresh token: %v", err)
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to create refresh token")
+	}
+
+	accessToken, err := utils.CreateJWT(acceessTokenPayload, "internal/certs/token/private.pem")
+	if err != nil {
+		log.Errorf("Failed to create access token: %v", err)
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to create access token")
+	}
+
+	setCookie := utils.SetCookie(ctx, u.Env.REFRESH_COOKIE_NAME, refreshToken, u.Env.REFRESH_COOKIE_MAXAGE)
+	if setCookie != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to set refresh cookie")
+	}
+
+	setCookie = utils.SetCookie(ctx, u.Env.ACCESS_COOKIE_NAME, accessToken, u.Env.ACCESS_COOKIE_MAXAGE)
+	if setCookie != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to set access cookie")
 	}
 
 	ctx.Status(fiber.StatusCreated)
