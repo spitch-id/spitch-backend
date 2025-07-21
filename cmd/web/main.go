@@ -29,7 +29,7 @@ func main() {
 
 	userRepository := repository.NewUserRepository()
 	userUsecase := usecase.NewUserUseCase(database, userRepository)
-	userHandler := handler.NewUserHandler(config.Validator, userUsecase)
+	userHandler := handler.NewUserHandler(config.Validator, userUsecase, *env)
 
 	apiGroup := app.Group("/api")
 	config.NewServerConfig(&config.ServerConfig{
