@@ -16,14 +16,15 @@ import (
 func main() {
 	env := config.NewEnv()
 	app := config.NewFiber(env)
-	validator := config.NewValidator()
 
-	userHandler := handler.NewUserHandler(validator)
+	config.Validator, config.Translator = config.NewValidator()
+
+	userHandler := handler.NewUserHandler(config.Validator)
 
 	apiGroup := app.Group("/api")
 	config.NewServerConfig(&config.ServerConfig{
 		App:         apiGroup,
-		Validator:   validator,
+		Validator:   config.Validator,
 		UserHandler: userHandler,
 	})
 
