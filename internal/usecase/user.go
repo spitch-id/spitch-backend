@@ -69,7 +69,7 @@ func (u *userUseCase) Login(ctx context.Context, user *dto.UserAuthRequest) (*dt
 }
 
 // Register implements domain.UserUsecase.
-func (u *userUseCase) Register(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error) {
+func (u *userUseCase) Register(ctx context.Context, user *dto.UserAuthRequest) (*domain.User, error) {
 	tx, err := u.DB.Begin(ctx)
 	if err != nil {
 		log.Errorf("failed to begin transaction: %v", err)
@@ -93,8 +93,9 @@ func (u *userUseCase) Register(ctx context.Context, user *dto.UserAuthRequest) (
 		return nil, err
 	}
 
-	response := &dto.UserAuthResponse{
+	response := &domain.User{
 		Email: userData.Email,
+		ID:    userData.ID,
 	}
 
 	log.Infof("user registered successfully: %s", userData.Email)
