@@ -32,7 +32,7 @@ type UserRepository interface {
 }
 
 type UserUsecase interface {
-	Register(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error)
+	Register(ctx context.Context, user *dto.UserAuthRequest) (*User, error)
 	Login(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error)
 	VerifyEmail(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error)
 	ChangePassword(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error)
