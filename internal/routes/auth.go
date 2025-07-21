@@ -7,9 +7,7 @@ import (
 func (r *Route) AuthRoutes(app fiber.Router) {
 	auth := app.Group("/auth")
 
-	auth.Post("/login", func(c *fiber.Ctx) error {
-		return c.SendString("Login endpoint")
-	})
+	auth.Post("/login", r.UserHandler.LoginUser)
 
 	auth.Post("/register", r.UserHandler.RegisterUser)
 

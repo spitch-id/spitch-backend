@@ -40,7 +40,34 @@ func (u *userHandler) ListUsers(ctx *fiber.Ctx) error {
 
 // LoginUser implements domain.UserHandler.
 func (u *userHandler) LoginUser(ctx *fiber.Ctx) error {
-	panic("unimplemented")
+	request := new(dto.UserAuthRequest)
+	if err := ctx.BodyParser(request); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
+	}
+
+	if err := u.Validate.Struct(request); err != nil {
+		return utils.HandleValidationError(ctx, u.Validate, err)
+	}
+
+	userData, err := u.UserUsecase.GetUserByEmail(ctx.Context(), request)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to get user by email")
+	}
+
+	if userData == nil {
+		return fiber.NewError(fiber.StatusNotFound, "User not found")
+	}
+
+	if !utils.CheckPasswordHash(request.Password, userData.Password) {
+		return fiber.NewError(fiber.StatusUnauthorized, "Invalid password")
+	}
+
+	response := &dto.UserAuthResponse{
+		Email: userData.Email,
+	}
+
+	ctx.Status(fiber.StatusOK)
+	return ctx.JSON(response)
 }
 
 // RegisterUser implements domain.UserHandler.

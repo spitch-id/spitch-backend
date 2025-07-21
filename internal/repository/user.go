@@ -66,11 +66,12 @@ func (u *userRepository) Delete(ctx context.Context, tx pgx.Tx, user *domain.Use
 // FindByEmail implements domain.UserRepository.
 func (u *userRepository) FindByEmail(ctx context.Context, tx pgx.Tx, email string) (*domain.User, error) {
 	var user domain.User
-	query := `SELECT id, email FROM users WHERE email = $1`
+	query := `SELECT id, email, password FROM users WHERE email = $1`
 
 	err := tx.QueryRow(ctx, query, email).Scan(
 		&user.ID,
 		&user.Email,
+		&user.Password,
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {

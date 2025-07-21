@@ -25,7 +25,7 @@ func (u *userUseCase) DeleteUser(ctx context.Context, user *dto.UserAuthRequest)
 }
 
 // GetUserByEmail implements domain.UserUsecase.
-func (u *userUseCase) GetUserByEmail(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error) {
+func (u *userUseCase) GetUserByEmail(ctx context.Context, user *dto.UserAuthRequest) (*domain.User, error) {
 	tx, err := u.DB.Begin(ctx)
 	if err != nil {
 		log.Errorf("failed to begin transaction: %v", err)
@@ -44,15 +44,17 @@ func (u *userUseCase) GetUserByEmail(ctx context.Context, user *dto.UserAuthRequ
 		return nil, err
 	}
 
-	response := &dto.UserAuthResponse{
-		Email: userData.Email,
+	response := &domain.User{
+		Email:    userData.Email,
+		ID:       userData.ID,
+		Password: userData.Password,
 	}
 
 	return response, nil
 }
 
 // GetUserByID implements domain.UserUsecase.
-func (u *userUseCase) GetUserByID(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error) {
+func (u *userUseCase) GetUserByID(ctx context.Context, user *dto.UserAuthRequest) (*domain.User, error) {
 	panic("unimplemented")
 }
 
