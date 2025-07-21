@@ -1,9 +1,13 @@
 package handler
 
 import (
+	"time"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/spitch-id/spitch-backend/domain"
+	"github.com/spitch-id/spitch-backend/internal/config"
 	"github.com/spitch-id/spitch-backend/internal/dto"
 	"github.com/spitch-id/spitch-backend/internal/utils"
 )
@@ -11,6 +15,7 @@ import (
 type userHandler struct {
 	Validate    *validator.Validate
 	UserUsecase domain.UserUsecase
+	Env         *config.Env
 }
 
 // ChangePassword implements domain.UserHandler.
@@ -64,6 +69,50 @@ func (u *userHandler) LoginUser(ctx *fiber.Ctx) error {
 
 	response := &dto.UserAuthResponse{
 		Email: userData.Email,
+	}
+
+	tokenCreatedAt := time.Now()
+	refreshTokenExpirationDate := tokenCreatedAt.Add(time.Hour * 24 * 30)
+	accessTokenExpirationDate := tokenCreatedAt.Add(time.Hour * 24)
+
+	refreshTokenPayload := utils.JWTClaim{
+		ID:        "123123",
+		UserID:    userData.ID,
+		Email:     userData.Email,
+		CreatedAt: tokenCreatedAt,
+		ExpiresAt: refreshTokenExpirationDate,
+		Issuer:    u.Env.REFRESH_COOKIE_DOMAIN,
+	}
+
+	acceessTokenPayload := utils.JWTClaim{
+		ID:        "123123",
+		UserID:    userData.ID,
+		Email:     userData.Email,
+		CreatedAt: tokenCreatedAt,
+		ExpiresAt: accessTokenExpirationDate,
+		Issuer:    u.Env.ACCESS_COOKIE_DOMAIN,
+	}
+
+	refreshToken, err := utils.CreateJWT(refreshTokenPayload, "internal/certs/token/private.pem")
+	if err != nil {
+		log.Errorf("Failed to create refresh token: %v", err)
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to create refresh token")
+	}
+
+	accessToken, err := utils.CreateJWT(acceessTokenPayload, "internal/certs/token/private.pem")
+	if err != nil {
+		log.Errorf("Failed to create access token: %v", err)
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to create access token")
+	}
+
+	setCookie := utils.SetCookie(ctx, u.Env.REFRESH_COOKIE_NAME, refreshToken, u.Env.REFRESH_COOKIE_MAXAGE)
+	if setCookie != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to set refresh cookie")
+	}
+
+	setCookie = utils.SetCookie(ctx, u.Env.ACCESS_COOKIE_NAME, accessToken, u.Env.ACCESS_COOKIE_MAXAGE)
+	if setCookie != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to set access cookie")
 	}
 
 	ctx.Status(fiber.StatusOK)
@@ -139,9 +188,10 @@ func (u *userHandler) VerifyEmail(ctx *fiber.Ctx) error {
 	panic("unimplemented")
 }
 
-func NewUserHandler(validate *validator.Validate, userUseCase domain.UserUsecase) domain.UserHandler {
+func NewUserHandler(validate *validator.Validate, userUseCase domain.UserUsecase, env config.Env) domain.UserHandler {
 	return &userHandler{
 		Validate:    validate,
 		UserUsecase: userUseCase,
+		Env:         &env,
 	}
 }
