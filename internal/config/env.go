@@ -16,7 +16,7 @@ type Env struct {
 	DATABASE_HOST                    string `mapstructure:"DATABASE_HOST"`
 	DATABASE_PORT                    string `mapstructure:"DATABASE_PORT"`
 	DATABASE_USER                    string `mapstructure:"DATABASE_USER"`
-	DATABSE_PASS                     string `mapstructure:"DATABSE_PASS"`
+	DATABASE_PASS                    string `mapstructure:"DATABSE_PASS"`
 	DATABASE_NAME                    string `mapstructure:"DATABASE_NAME"`
 	DATABASE_TIMEZONE                string `mapstructure:"DATABASE_TIMEZONE"`
 	DATABASE_SSLMODE                 string `mapstructure:"DATABASE_SSLMODE"`
