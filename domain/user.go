@@ -1,46 +1,47 @@
 package domain
 
 import (
-	"database/sql"
+	"context"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/jackc/pgx/v5"
+	"github.com/spitch-id/spitch-backend/internal/dto"
 )
 
 type User struct {
-	ID                string       `db:"id"`
-	FullName          string       `db:"full_name"`
-	Phone             string       `db:"phone"`
-	Email             string       `db:"email"`
-	Password          string       `db:"password"`
-	EmailVerifiedAtDB sql.NullTime `db:"email_verified_at"`
-	EmailVerifiedAt   time.Time    `db:"-"`
-	CreatedAt         time.Time    `db:"created_at"`
-	UpdatedAt         time.Time    `db:"updated_at"`
+	ID              string    `db:"id"`
+	FullName        string    `db:"full_name"`
+	Phone           string    `db:"phone"`
+	Email           string    `db:"email"`
+	Password        string    `db:"password"`
+	EmailVerifiedAt time.Time `db:"email_verified_at"`
+	CreatedAt       time.Time `db:"created_at"`
+	UpdatedAt       time.Time `db:"updated_at"`
 }
 
 type UserRepository interface {
-	FindByID(id string) (*User, error)
-	FindByEmail(email string) (*User, error)
-	Create(user *User) error
-	Update(user *User) error
-	Delete(id string) error
-	VerifyEmail(id string) error
-	ChangePassword(id, newPassword string) error
-	ResetPassword(id, newPassword string) error
+	FindByID(ctx context.Context, tx pgx.Tx, id string) (*User, error)
+	FindByEmail(ctx context.Context, tx pgx.Tx, email string) (*User, error)
+	Create(ctx context.Context, tx pgx.Tx, user *User) (*User, error)
+	Update(ctx context.Context, tx pgx.Tx, user *User) (*User, error)
+	Delete(ctx context.Context, tx pgx.Tx, user *User) (*User, error)
+	VerifyEmail(ctx context.Context, tx pgx.Tx, email string) (*User, error)
+	ChangePassword(ctx context.Context, tx pgx.Tx, user *User) (*User, error)
+	ResetPassword(ctx context.Context, tx pgx.Tx, user *User) (*User, error)
 }
 
 type UserUsecase interface {
-	Register(user *User) error
-	Login(email, password string) (*User, error)
-	VerifyEmail(id string) error
-	ChangePassword(id, oldPassword, newPassword string) error
-	ResetPassword(email, newPassword string) error
-	GetUserByID(id string) (*User, error)
-	GetUserByEmail(email string) (*User, error)
-	UpdateUser(user *User) error
-	DeleteUser(id string) error
-	ListUsers() ([]*User, error)
+	Register(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error)
+	Login(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error)
+	VerifyEmail(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error)
+	ChangePassword(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error)
+	ResetPassword(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error)
+	GetUserByID(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error)
+	GetUserByEmail(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error)
+	UpdateUser(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error)
+	DeleteUser(ctx context.Context, user *dto.UserAuthRequest) (*dto.UserAuthResponse, error)
+	ListUsers(ctx context.Context, user *dto.UserAuthRequest) ([]*dto.UserAuthResponse, error) //([]*User, error)
 }
 
 type UserHandler interface {
