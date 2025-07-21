@@ -10,7 +10,10 @@ import (
 
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/spitch-id/spitch-backend/internal/config"
+	"github.com/spitch-id/spitch-backend/internal/connection"
 	"github.com/spitch-id/spitch-backend/internal/handler"
+	"github.com/spitch-id/spitch-backend/internal/repository"
+	"github.com/spitch-id/spitch-backend/internal/usecase"
 )
 
 func main() {
@@ -19,7 +22,14 @@ func main() {
 
 	config.Validator, config.Translator = config.NewValidator()
 
-	userHandler := handler.NewUserHandler(config.Validator)
+	database := connection.NewDatabase(env)
+	if database == nil {
+		log.Fatal("Failed to connect to the database")
+	}
+
+	userRepository := repository.NewUserRepository()
+	userUsecase := usecase.NewUserUseCase(database, userRepository)
+	userHandler := handler.NewUserHandler(config.Validator, userUsecase)
 
 	apiGroup := app.Group("/api")
 	config.NewServerConfig(&config.ServerConfig{
