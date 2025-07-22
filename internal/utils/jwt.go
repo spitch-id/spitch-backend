@@ -3,27 +3,17 @@ package utils
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/spitch-id/spitch-backend/internal/dto"
 )
 
-type JWTClaim struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"user_id"`
-	Email     string    `json:"email"`
-	Issuer    string    `json:"-"`
-	ExpiresAt time.Time `json:"-"`
-	CreatedAt time.Time `json:"-"`
-	*jwt.RegisteredClaims
-}
-
-func CreateJWT(payload JWTClaim, fileLocation string) (string, error) {
+func CreateJWT(payload dto.JWTClaim, fileLocation string) (string, error) {
 	if fileLocation == "" {
 		fileLocation = "internal/certs/token/private.pem"
 	}
 
-	claim := JWTClaim{
+	claim := dto.JWTClaim{
 		ID:     payload.ID,
 		UserID: payload.UserID,
 		Email:  payload.Email,
@@ -56,12 +46,12 @@ func CreateJWT(payload JWTClaim, fileLocation string) (string, error) {
 	return jwtToken, nil
 }
 
-func VerifyToken(tokenStr string, fileLocation string) (*JWTClaim, error) {
+func VerifyToken(tokenStr string, fileLocation string) (*dto.JWTClaim, error) {
 	if fileLocation == "" {
 		fileLocation = "internal/certs/token/public.pem"
 	}
 
-	token, err := jwt.ParseWithClaims(tokenStr, &JWTClaim{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &dto.JWTClaim{}, func(token *jwt.Token) (interface{}, error) {
 		publicKey, err := os.ReadFile(fileLocation)
 		if err != nil {
 			return nil, err
@@ -87,7 +77,7 @@ func VerifyToken(tokenStr string, fileLocation string) (*JWTClaim, error) {
 		return nil, fmt.Errorf("invalid or expired token")
 	}
 
-	claims, ok := token.Claims.(*JWTClaim)
+	claims, ok := token.Claims.(*dto.JWTClaim)
 	if !ok {
 		return nil, fmt.Errorf("invalid token claims")
 	}
