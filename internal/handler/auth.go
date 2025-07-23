@@ -75,7 +75,7 @@ func (u *userHandler) LoginUser(ctx *fiber.Ctx) error {
 	refreshTokenExpirationDate := tokenCreatedAt.Add(time.Hour * 24 * 30)
 	accessTokenExpirationDate := tokenCreatedAt.Add(time.Hour * 24)
 
-	refreshTokenPayload := utils.JWTClaim{
+	refreshTokenPayload := dto.JWTClaim{
 		ID:        "123123",
 		UserID:    userData.ID,
 		Email:     userData.Email,
@@ -84,7 +84,7 @@ func (u *userHandler) LoginUser(ctx *fiber.Ctx) error {
 		Issuer:    u.Env.REFRESH_COOKIE_DOMAIN,
 	}
 
-	acceessTokenPayload := utils.JWTClaim{
+	acceessTokenPayload := dto.JWTClaim{
 		ID:        "123123",
 		UserID:    userData.ID,
 		Email:     userData.Email,
@@ -173,7 +173,7 @@ func (u *userHandler) RegisterUser(ctx *fiber.Ctx) error {
 	refreshTokenExpirationDate := tokenCreatedAt.Add(time.Hour * 24 * 30)
 	accessTokenExpirationDate := tokenCreatedAt.Add(time.Hour * 24)
 
-	refreshTokenPayload := utils.JWTClaim{
+	refreshTokenPayload := dto.JWTClaim{
 		ID:        "123123",
 		UserID:    userData.ID,
 		Email:     userData.Email,
@@ -182,7 +182,7 @@ func (u *userHandler) RegisterUser(ctx *fiber.Ctx) error {
 		Issuer:    u.Env.REFRESH_COOKIE_DOMAIN,
 	}
 
-	acceessTokenPayload := utils.JWTClaim{
+	acceessTokenPayload := dto.JWTClaim{
 		ID:        "123123",
 		UserID:    userData.ID,
 		Email:     userData.Email,
